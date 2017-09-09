@@ -23,8 +23,10 @@ public final class RestAdapter {
     private ApiEndpoint endpoint;
 
     private RestAdapter() {
+
         GsonBuilder builder = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation();
+                .excludeFieldsWithoutExposeAnnotation()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
         Type articlesType = new TypeToken<List<Article>>() {}.getType();
         builder.registerTypeAdapter(articlesType, new ApiAdapter<List<Article>>());

@@ -6,19 +6,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pelluch.hackernewsviewer.ArticleActivity;
 import com.pelluch.hackernewsviewer.R;
 import com.pelluch.hackernewsviewer.models.Article;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by pablo on 9/9/17.
  */
 
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder> {
+
+    private final static SimpleDateFormat timeFormat = new
+            SimpleDateFormat("HH:mm", Locale.getDefault());
+    private final static SimpleDateFormat dateFormat = new
+            SimpleDateFormat("dd/MMM/yy", Locale.getDefault());
 
     private List<Article> articles = new ArrayList<>();
 
@@ -36,9 +46,16 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             @Override
             public void onClick(View v) {
                 Article article = articles.get(holder.getAdapterPosition());
-                Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
-                intent.putExtra("url", article.getUrl());
-                parent.getContext().startActivity(intent);
+                if(article.getUrl() != null && !article.getUrl().isEmpty()) {
+                    Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
+                    intent.putExtra("url", article.getUrl());
+                    parent.getContext().startActivity(intent);
+                } else {
+                    Toast.makeText(parent.getContext(),
+                            "No url for this story",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
             }
         });
         return holder;
@@ -48,7 +65,35 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     public void onBindViewHolder(ArticleViewHolder holder, int position) {
         Article article = articles.get(position);
         holder.titleText.setText(article.getTitle());
-        holder.authorText.setText(article.getAuthor());
+
+        Date articleDate = article.getCreatedAt();
+        Date currentDate = new Date();
+
+        String suffix;
+        String timeString = timeFormat.format(articleDate);
+        String dateString = dateFormat.format(articleDate);
+
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(articleDate);
+        cal2.setTime(currentDate);
+        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+        boolean yesterday = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal2.get(Calendar.DAY_OF_YEAR) - cal1.get(Calendar.DAY_OF_YEAR) == 1;
+
+        if(sameDay) {
+            suffix = timeString;
+        } else if(yesterday) {
+            suffix = holder.itemView.getContext().getString(R.string.yesterday);
+        } else {
+            suffix = dateString.replace('.', Character.MIN_VALUE);
+        }
+
+        holder.authorText.setText(article.getAuthor() + " - " + suffix);
+
+
+
     }
 
     @Override

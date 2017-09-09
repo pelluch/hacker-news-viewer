@@ -4,12 +4,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.pelluch.hackernewsviewer.adapters.ArticleAdapter;
 import com.pelluch.hackernewsviewer.http.RestAdapter;
@@ -29,6 +30,8 @@ public class MainActivityFragment extends Fragment {
 
     private ArticleAdapter adapter;
     private RecyclerView articleRecycler;
+    private SwipeRefreshLayout refreshLayout;
+    private ProgressBar progressBar;
 
     public MainActivityFragment() {
     }
@@ -38,7 +41,43 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         articleRecycler = view.findViewById(R.id.article_recycler);
+        refreshLayout = view.findViewById(R.id.refresh_layout);
+        progressBar = view.findViewById(R.id.progress_bar);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadArticles();
+            }
+        });
         return view;
+    }
+
+    private void stopRefreshing() {
+        if(isAdded()) {
+            refreshLayout.setRefreshing(false);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadArticles() {
+        RestAdapter.getArticlesEndpoint()
+                .getArticles()
+                .enqueue(new Callback<List<Article>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<List<Article>> call,
+                                           @NonNull Response<List<Article>> response) {
+                        stopRefreshing();
+                        if(response.isSuccessful()) {
+                            adapter.setArticles(response.body());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Article>> call,
+                                          @NonNull Throwable t) {
+                        stopRefreshing();
+                    }
+                });
     }
 
     @Override
@@ -49,26 +88,6 @@ public class MainActivityFragment extends Fragment {
         articleRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         articleRecycler.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
             .build());
-        RestAdapter.getArticlesEndpoint()
-                .getArticles()
-                .enqueue(new Callback<List<Article>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<List<Article>> call,
-                                           @NonNull Response<List<Article>> response) {
-                        Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT)
-                                .show();
-                        if(response.isSuccessful()) {
-                            adapter.setArticles(response.body());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<List<Article>> call,
-                                          @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT)
-                                .show();
-
-                    }
-                });
+        loadArticles();
     }
 }

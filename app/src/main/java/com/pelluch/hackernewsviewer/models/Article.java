@@ -12,7 +12,7 @@ import java.util.Date;
 public class Article {
     @SerializedName("created_at")
     @Expose
-    private String createdAt;
+    private Date createdAt;
     @SerializedName("title")
     @Expose
     private String title;
@@ -57,5 +57,8 @@ public class Article {
 
     public int getCreatedAtI() {
         return createdAtI;
+    }
+    public Date getCreatedAt() {
+        return createdAt;
     }
 }
