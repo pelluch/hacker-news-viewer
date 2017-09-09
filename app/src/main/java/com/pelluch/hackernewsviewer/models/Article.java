@@ -42,7 +42,7 @@ public class Article {
     private String objectID;
 
     private boolean deleted;
-    
+
     public String getAuthor() {
         return author;
     }

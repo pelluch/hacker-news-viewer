@@ -4,6 +4,7 @@ import com.pelluch.hackernewsviewer.models.Article;
 
 import java.util.List;
 
+import retrofit2.Call;
 import retrofit2.http.GET;
 
 /**
@@ -11,6 +12,6 @@ import retrofit2.http.GET;
  */
 
 public interface ApiEndpoint {
-    @GET
-    List<Article> getArticles();
+    @GET("/api/v1/search_by_date?query=android")
+    Call<List<Article>> getArticles();
 }
