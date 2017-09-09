@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,13 +55,13 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             @Override
             public void onClick(View v) {
                 Article article = articles.get(holder.getAdapterPosition());
-                if(article.getUrl() != null && !article.getUrl().isEmpty()) {
+                if(URLUtil.isValidUrl(article.getUrl())) {
                     Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
                     intent.putExtra("url", article.getUrl());
                     parent.getContext().startActivity(intent);
                 } else {
                     Toast.makeText(parent.getContext(),
-                            "No url for this story",
+                            "No valid url for this story",
                             Toast.LENGTH_SHORT)
                             .show();
                 }
