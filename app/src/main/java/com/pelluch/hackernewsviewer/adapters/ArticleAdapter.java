@@ -15,6 +15,8 @@ import com.pelluch.hackernewsviewer.models.Article;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +35,12 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     private List<Article> articles = new ArrayList<>();
 
     public void setArticles(List<Article> articles) {
+        Collections.sort(articles, new Comparator<Article>() {
+            @Override
+            public int compare(Article o1, Article o2) {
+                return o2.getCreatedAtI() - o1.getCreatedAtI();
+            }
+        });
         this.articles = articles;
         notifyDataSetChanged();
     }
