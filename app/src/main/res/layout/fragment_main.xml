@@ -5,8 +5,12 @@
     android:layout_height="match_parent"
     tools:context="com.pelluch.hackernewsviewer.MainActivityFragment"
     tools:showIn="@layout/activity_main">
-    <android.support.v7.widget.RecyclerView
+    <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
-        android:id="@+id/article_recycler" android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:id="@+id/article_recycler" android:layout_height="match_parent"
+            />
+    </android.support.v4.widget.SwipeRefreshLayout>
 </android.support.constraint.ConstraintLayout>

@@ -1,11 +1,13 @@
 package com.pelluch.hackernewsviewer.adapters;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.pelluch.hackernewsviewer.ArticleActivity;
 import com.pelluch.hackernewsviewer.R;
 import com.pelluch.hackernewsviewer.models.Article;
 
@@ -26,10 +28,19 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     }
 
     @Override
-    public ArticleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArticleViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.article_row, parent, false);
-        ArticleViewHolder holder = new ArticleViewHolder(view);
+        final ArticleViewHolder holder = new ArticleViewHolder(view);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Article article = articles.get(holder.getAdapterPosition());
+                Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
+                intent.putExtra("url", article.getUrl());
+                parent.getContext().startActivity(intent);
+            }
+        });
         return holder;
     }
 

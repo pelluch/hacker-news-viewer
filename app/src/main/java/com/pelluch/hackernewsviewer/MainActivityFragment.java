@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.pelluch.hackernewsviewer.adapters.ArticleAdapter;
 import com.pelluch.hackernewsviewer.http.RestAdapter;
 import com.pelluch.hackernewsviewer.models.Article;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.List;
 
@@ -46,6 +47,8 @@ public class MainActivityFragment extends Fragment {
         adapter = new ArticleAdapter();
         articleRecycler.setAdapter(adapter);
         articleRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        articleRecycler.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
+            .build());
         RestAdapter.getArticlesEndpoint()
                 .getArticles()
                 .enqueue(new Callback<List<Article>>() {
