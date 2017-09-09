@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import com.pelluch.hackernewsviewer.adapters.ArticleAdapter;
 import com.pelluch.hackernewsviewer.http.RestAdapter;
 import com.pelluch.hackernewsviewer.models.Article;
+import com.pelluch.hackernewsviewer.models.ArticleResponse;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.List;
@@ -62,18 +63,18 @@ public class MainActivityFragment extends Fragment {
     private void loadArticles() {
         RestAdapter.getArticlesEndpoint()
                 .getArticles()
-                .enqueue(new Callback<List<Article>>() {
+                .enqueue(new Callback<ArticleResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<List<Article>> call,
-                                           @NonNull Response<List<Article>> response) {
+                    public void onResponse(@NonNull Call<ArticleResponse> call,
+                                           @NonNull Response<ArticleResponse> response) {
                         stopRefreshing();
                         if(response.isSuccessful()) {
-                            adapter.setArticles(response.body());
+                            adapter.setArticles(response.body().getArticles());
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<List<Article>> call,
+                    public void onFailure(@NonNull Call<ArticleResponse> call,
                                           @NonNull Throwable t) {
                         stopRefreshing();
                     }

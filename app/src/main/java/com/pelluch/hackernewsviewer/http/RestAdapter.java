@@ -1,5 +1,6 @@
 package com.pelluch.hackernewsviewer.http;
 
+import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -25,12 +26,9 @@ public final class RestAdapter {
     private RestAdapter() {
 
         GsonBuilder builder = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                .excludeFieldsWithoutExposeAnnotation();
 
-        Type articlesType = new TypeToken<List<Article>>() {}.getType();
-        builder.registerTypeAdapter(articlesType, new ApiAdapter<List<Article>>());
-        Gson gson = builder.create();
+        Gson gson = Converters.registerDateTime(builder).create();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_URL)

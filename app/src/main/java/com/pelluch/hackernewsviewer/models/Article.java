@@ -3,6 +3,8 @@ package com.pelluch.hackernewsviewer.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.joda.time.DateTime;
+
 import java.util.Date;
 
 /**
@@ -12,7 +14,7 @@ import java.util.Date;
 public class Article {
     @SerializedName("created_at")
     @Expose
-    private Date createdAt;
+    private DateTime createdAt;
     @SerializedName("title")
     @Expose
     private String title;
@@ -58,7 +60,7 @@ public class Article {
     public int getCreatedAtI() {
         return createdAtI;
     }
-    public Date getCreatedAt() {
+    public DateTime getCreatedAt() {
         return createdAt;
     }
 }

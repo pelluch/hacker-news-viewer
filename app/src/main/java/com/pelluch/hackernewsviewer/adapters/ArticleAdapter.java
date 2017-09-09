@@ -13,6 +13,10 @@ import com.pelluch.hackernewsviewer.ArticleActivity;
 import com.pelluch.hackernewsviewer.R;
 import com.pelluch.hackernewsviewer.models.Article;
 
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
+import org.joda.time.Minutes;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,12 +40,13 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     private List<Article> articles = new ArrayList<>();
 
     public void setArticles(List<Article> articles) {
-        Collections.sort(articles, new Comparator<Article>() {
+        /* Collections.sort(articles, new Comparator<Article>() {
             @Override
             public int compare(Article o1, Article o2) {
                 return o2.getCreatedAtI() - o1.getCreatedAtI();
             }
         });
+        */
         this.articles = articles;
         notifyDataSetChanged();
     }
@@ -75,34 +80,27 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         Article article = articles.get(position);
         holder.titleText.setText(article.getTitle());
 
-        Date articleDate = article.getCreatedAt();
-        Date currentDate = new Date();
+        DateTime articleDate = article.getCreatedAt();
+        DateTime currentDate = DateTime.now();
 
         String suffix;
-        String timeString = timeFormat.format(articleDate);
-        String dateString = dateFormat.format(articleDate);
+        String dateString = dateFormat.format(articleDate.toDate());
 
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-        cal1.setTime(articleDate);
-        cal2.setTime(currentDate);
-        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-        boolean yesterday = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal2.get(Calendar.DAY_OF_YEAR) - cal1.get(Calendar.DAY_OF_YEAR) == 1;
-
-        if(sameDay) {
-            suffix = timeString;
-        } else if(yesterday) {
-            suffix = holder.itemView.getContext().getString(R.string.yesterday);
+        int minutes = Minutes.minutesBetween(articleDate, currentDate).getMinutes();
+        if(minutes < 60) {
+            suffix = minutes + "m";
         } else {
-            suffix = dateString.replace('.', Character.MIN_VALUE);
+            DateTime midnightToday = DateTime.now().withTimeAtStartOfDay();
+            if(articleDate.isAfter(midnightToday)) {
+                Hours hours = Hours.hoursBetween(articleDate, currentDate);
+                suffix = hours.getHours() + "h";
+            } else if(articleDate.isAfter(midnightToday.minusDays(1))) {
+                suffix = "Yesterday";
+            } else {
+                suffix = dateString.replace('.', Character.MIN_VALUE);
+            }
         }
-
         holder.authorText.setText(article.getAuthor() + " - " + suffix);
-
-
-
     }
 
     @Override
