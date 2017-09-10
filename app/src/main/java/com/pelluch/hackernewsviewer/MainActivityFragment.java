@@ -138,9 +138,9 @@ public class MainActivityFragment extends Fragment {
                             // older articles unless we are offline or an error occurs
                             getArticleDao().deleteAll();
                             getArticleDao().insertOrReplaceInTx(articleMap.values());
-                            adapter.setArticles(
-                                    loadArticlesInOrder()
-                            );
+                            loadFromLocalStorage();
+                        } else {
+                            loadFromLocalStorage();
                         }
                     }
 
@@ -148,11 +148,15 @@ public class MainActivityFragment extends Fragment {
                     public void onFailure(@NonNull Call<ArticleResponse> call,
                                           @NonNull Throwable t) {
                         stopRefreshing();
-                        List<Article> articles =
-                                loadArticlesInOrder();
-                        adapter.setArticles(articles);
+                        loadFromLocalStorage();
                     }
                 });
+    }
+
+    private void loadFromLocalStorage() {
+        List<Article> articles =
+                loadArticlesInOrder();
+        adapter.setArticles(articles);
     }
 
     @Override
