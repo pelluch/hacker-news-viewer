@@ -1,6 +1,5 @@
 package com.pelluch.hackernewsviewer;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,6 +101,9 @@ public class MainActivityFragment extends Fragment {
 
     }
 
+    /**
+     * Load articles from API using retrofit
+     */
     private void loadArticles() {
         RestAdapter.getArticlesEndpoint()
                 .getArticles()
@@ -114,15 +115,27 @@ public class MainActivityFragment extends Fragment {
                         if(response.isSuccessful()) {
                             final List<Article> articles = response.body()
                                     .getArticles();
+
+                            // For somewhat more efficient removal of deleted items,
+                            // first put articles into Hash
                             final Map<String, Article> articleMap = new HashMap<>();
                             for(Article article : articles) {
                                 articleMap.put(
                                         article.getObjectID(), article
                                 );
                             }
+
+                            // Now iterate through deleted articles
+                            // This has a lot of room for optimization, especially
+                            // considering cases when number of deleted articles
+                            // is large and grows with time
                             for(DeletedArticle deleted : getDeletedArticles()) {
                                 articleMap.remove(deleted.getObjectID());
                             }
+
+                            // Remove existing articles
+                            // It's assumed from requirements that we don't store
+                            // older articles unless we are offline or an error occurs
                             getArticleDao().deleteAll();
                             getArticleDao().insertOrReplaceInTx(articleMap.values());
                             adapter.setArticles(
@@ -150,10 +163,12 @@ public class MainActivityFragment extends Fragment {
         articleRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         articleRecycler.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
             .build());
+
+        // Swipe layout configuration
         onTouchListener = new RecyclerTouchListener(getActivity(),
                 articleRecycler)
                 .setSwipeOptionViews(R.id.rl_match_trash)
-                .setSwipeable(R.id.row_fg, R.id.row_bg, new RecyclerTouchListener.OnSwipeOptionsClickListener() {
+                .setSwipeable(R.id.swipe_foreground, R.id.swipe_background, new RecyclerTouchListener.OnSwipeOptionsClickListener() {
                     @Override
                     public void onSwipeOptionClicked(int viewID, int position) {
 

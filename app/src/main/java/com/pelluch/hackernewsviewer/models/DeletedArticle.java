@@ -5,9 +5,11 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 
 /**
- * Created by pablo on 9/9/17.
+ * A separate entity is used to store deleted article ids
+ * This is mostly due to the fact that we clear the article table
+ * on each successful load, and also allows us to store less data
+ * as only id is needed here
  */
-
 @Entity
 public class DeletedArticle {
     @Id

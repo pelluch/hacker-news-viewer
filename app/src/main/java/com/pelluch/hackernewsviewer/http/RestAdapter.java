@@ -28,6 +28,7 @@ public final class RestAdapter {
         GsonBuilder builder = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation();
 
+        // Use Joda Time for created_at
         Gson gson = Converters.registerDateTime(builder).create();
 
         Retrofit retrofit = new Retrofit.Builder()

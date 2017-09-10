@@ -10,6 +10,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+/**
+ * SwipeRefreshLayout subclass is used in order to provide a smoother "swipe"
+ * action when a swipe layout (such as delete in article row) is used together
+ * with a refresh layout
+ */
 public class CustomSwipeToRefresh extends SwipeRefreshLayout {
 
     private int mTouchSlop;

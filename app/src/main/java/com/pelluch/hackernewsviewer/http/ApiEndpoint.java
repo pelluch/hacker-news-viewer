@@ -1,9 +1,6 @@
 package com.pelluch.hackernewsviewer.http;
 
-import com.pelluch.hackernewsviewer.models.Article;
 import com.pelluch.hackernewsviewer.models.ArticleResponse;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

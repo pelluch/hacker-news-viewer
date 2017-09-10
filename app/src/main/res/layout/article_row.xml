@@ -8,9 +8,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/row_bg"
-        android:layout_alignTop="@+id/row_fg"
-        android:layout_alignBottom="@+id/row_fg"
+        android:id="@+id/swipe_background"
+        android:layout_alignTop="@+id/swipe_foreground"
+        android:layout_alignBottom="@+id/swipe_foreground"
         android:layout_alignParentEnd="true"
         >
         <RelativeLayout
@@ -27,7 +27,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete"
+                android:text="@string/action_delete"
                 android:textColor="@android:color/white"
                 />
         </RelativeLayout>
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:id="@+id/row_fg"
+        android:id="@+id/swipe_foreground"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -59,7 +59,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/author_text"
+                android:id="@+id/subtitle_text"
                 android:textSize="13sp"
                 />
         </LinearLayout>

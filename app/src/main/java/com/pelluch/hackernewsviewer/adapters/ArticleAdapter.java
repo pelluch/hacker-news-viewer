@@ -32,21 +32,15 @@ import java.util.Locale;
 
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder> {
 
-    private final static SimpleDateFormat timeFormat = new
-            SimpleDateFormat("HH:mm", Locale.getDefault());
+    // Used for articles older than yesterday
     private final static SimpleDateFormat dateFormat = new
             SimpleDateFormat("dd/MMM/yy", Locale.getDefault());
 
+    public final static String EXTRA_URL = "url";
+    private final static int MINUTES_PER_HOUR = 60;
     private List<Article> articles = new ArrayList<>();
 
     public void setArticles(List<Article> articles) {
-        /* Collections.sort(articles, new Comparator<Article>() {
-            @Override
-            public int compare(Article o1, Article o2) {
-                return o2.getCreatedAtI() - o1.getCreatedAtI();
-            }
-        });
-        */
         this.articles = articles;
         notifyDataSetChanged();
     }
@@ -56,12 +50,16 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.article_row, parent, false);
         final ArticleViewHolder holder = new ArticleViewHolder(view);
+
         holder.deleteLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 Article deleted = articles.remove(position);
                 notifyItemRemoved(position);
+                // Insert into 'deleted' table
+                // A separate table is used due to the fact that we
+                // clear articles table on successful loads
                 DaoHelper.getInstance(parent.getContext())
                         .getSession()
                         .getDeletedArticleDao()
@@ -74,7 +72,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
                 Article article = articles.get(holder.getAdapterPosition());
                 if(URLUtil.isValidUrl(article.getRealUrl())) {
                     Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
-                    intent.putExtra("url", article.getRealUrl());
+                    intent.putExtra(EXTRA_URL, article.getRealUrl());
                     parent.getContext().startActivity(intent);
                 } else {
                     Toast.makeText(parent.getContext(),
@@ -99,17 +97,20 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         String dateString = dateFormat.format(articleDate.toDate());
 
         int minutes = Minutes.minutesBetween(articleDate, currentDate).getMinutes();
-        if(minutes < 60) {
+        // If article was created less than an hour ago, append m
+        if(minutes < MINUTES_PER_HOUR) {
             suffix = minutes + "m";
         } else {
+            // Otherwise, if it was created during the current day, append m
+            // In any other case, append yesterday
             DateTime midnightToday = DateTime.now().withTimeAtStartOfDay();
             if(articleDate.isAfter(midnightToday)) {
                 Hours hours = Hours.hoursBetween(articleDate, currentDate);
                 suffix = hours.getHours() + "h";
             } else if(articleDate.isAfter(midnightToday.minusDays(1))) {
-                suffix = "Yesterday";
+                suffix = holder.itemView.getContext().getString(R.string.yesterday);
             } else {
-                suffix = dateString.replace('.', Character.MIN_VALUE);
+                suffix = dateString;
             }
         }
         holder.authorText.setText(article.getAuthor() + " - " + suffix);
@@ -128,7 +129,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         ArticleViewHolder(View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.title_text);
-            authorText = itemView.findViewById(R.id.author_text);
+            authorText = itemView.findViewById(R.id.subtitle_text);
             deleteLayout = itemView.findViewById(R.id.rl_match_trash);
             topView = itemView.findViewById(R.id.top_view);
         }
