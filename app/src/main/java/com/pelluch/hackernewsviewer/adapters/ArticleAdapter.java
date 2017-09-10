@@ -6,12 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pelluch.hackernewsviewer.ArticleActivity;
+import com.pelluch.hackernewsviewer.DaoHelper;
 import com.pelluch.hackernewsviewer.R;
 import com.pelluch.hackernewsviewer.models.Article;
+import com.pelluch.hackernewsviewer.models.DeletedArticle;
 
 import org.joda.time.DateTime;
 import org.joda.time.Hours;
@@ -19,10 +23,6 @@ import org.joda.time.Minutes;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,13 +56,25 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.article_row, parent, false);
         final ArticleViewHolder holder = new ArticleViewHolder(view);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.deleteLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = holder.getAdapterPosition();
+                Article deleted = articles.remove(position);
+                notifyItemRemoved(position);
+                DaoHelper.getInstance(parent.getContext())
+                        .getSession()
+                        .getDeletedArticleDao()
+                        .insertInTx(new DeletedArticle(deleted.getObjectID()));
+            }
+        });
+        holder.topView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Article article = articles.get(holder.getAdapterPosition());
-                if(URLUtil.isValidUrl(article.getUrl())) {
+                if(URLUtil.isValidUrl(article.getRealUrl())) {
                     Intent intent = new Intent(parent.getContext(), ArticleActivity.class);
-                    intent.putExtra("url", article.getUrl());
+                    intent.putExtra("url", article.getRealUrl());
                     parent.getContext().startActivity(intent);
                 } else {
                     Toast.makeText(parent.getContext(),
@@ -78,7 +90,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     @Override
     public void onBindViewHolder(ArticleViewHolder holder, int position) {
         Article article = articles.get(position);
-        holder.titleText.setText(article.getTitle());
+        holder.titleText.setText(article.getRealTitle());
 
         DateTime articleDate = article.getCreatedAt();
         DateTime currentDate = DateTime.now();
@@ -111,10 +123,14 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     static class ArticleViewHolder extends RecyclerView.ViewHolder {
         TextView titleText;
         TextView authorText;
+        RelativeLayout deleteLayout;
+        LinearLayout topView;
         ArticleViewHolder(View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.title_text);
             authorText = itemView.findViewById(R.id.author_text);
+            deleteLayout = itemView.findViewById(R.id.rl_match_trash);
+            topView = itemView.findViewById(R.id.top_view);
         }
     }
 }

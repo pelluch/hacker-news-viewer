@@ -1,23 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:focusable="true"
-    android:clickable="true"
-    android:padding="10dp"
+    android:background="@android:color/white"
     >
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/title_text"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        />
-    <TextView
-        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/row_bg"
+        android:layout_alignTop="@+id/row_fg"
+        android:layout_alignBottom="@+id/row_fg"
+        android:layout_alignParentEnd="true"
+        >
+        <RelativeLayout
+            android:layout_width="85dp"
+            android:layout_height="match_parent"
+            android:id="@+id/rl_match_trash"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:background="@android:color/holo_red_dark"
+
+
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:textColor="@android:color/white"
+                />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/author_text"
-        android:textSize="13sp"
-        />
-</LinearLayout>
+        android:background="@android:color/white"
+        android:id="@+id/row_fg"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:clickable="true"
+            android:padding="10dp"
+            android:background="?attr/selectableItemBackground"
+            android:id="@+id/top_view"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/title_text"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/author_text"
+                android:textSize="13sp"
+                />
+        </LinearLayout>
+    </FrameLayout>
+
+</RelativeLayout>

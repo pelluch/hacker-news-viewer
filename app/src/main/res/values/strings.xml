@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Hacker News Viewer</string>
     <string name="yesterday">Yesterday</string>
+    <string name="web_view_error">We could not load your article at this time</string>
 </resources>

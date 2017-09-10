@@ -1,5 +1,6 @@
 package com.pelluch.hackernewsviewer;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -7,18 +8,24 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.nikhilpanju.recyclerviewenhanced.RecyclerTouchListener;
 import com.pelluch.hackernewsviewer.adapters.ArticleAdapter;
 import com.pelluch.hackernewsviewer.http.RestAdapter;
 import com.pelluch.hackernewsviewer.models.Article;
+import com.pelluch.hackernewsviewer.models.ArticleDao;
 import com.pelluch.hackernewsviewer.models.ArticleResponse;
+import com.pelluch.hackernewsviewer.models.DeletedArticle;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,8 +40,21 @@ public class MainActivityFragment extends Fragment {
     private RecyclerView articleRecycler;
     private SwipeRefreshLayout refreshLayout;
     private ProgressBar progressBar;
+    private RecyclerTouchListener onTouchListener;
 
     public MainActivityFragment() {
+    }
+
+    @Override
+    public void onPause() {
+        articleRecycler.removeOnItemTouchListener(onTouchListener);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        articleRecycler.addOnItemTouchListener(onTouchListener);
     }
 
     @Override
@@ -60,6 +80,29 @@ public class MainActivityFragment extends Fragment {
         }
     }
 
+    private ArticleDao getArticleDao() {
+        return DaoHelper.getInstance(getContext())
+                .getSession()
+                .getArticleDao();
+    }
+
+    private List<DeletedArticle> getDeletedArticles() {
+        return DaoHelper.getInstance(getContext())
+                .getSession()
+                .getDeletedArticleDao()
+                .loadAll();
+    }
+
+    private List<Article> loadArticlesInOrder() {
+        List<DeletedArticle> deleted = getDeletedArticles();
+        return getArticleDao()
+                .queryBuilder()
+                .orderDesc(ArticleDao.Properties.CreatedAt)
+                .where(ArticleDao.Properties.ObjectID.notIn(deleted))
+                .list();
+
+    }
+
     private void loadArticles() {
         RestAdapter.getArticlesEndpoint()
                 .getArticles()
@@ -69,7 +112,22 @@ public class MainActivityFragment extends Fragment {
                                            @NonNull Response<ArticleResponse> response) {
                         stopRefreshing();
                         if(response.isSuccessful()) {
-                            adapter.setArticles(response.body().getArticles());
+                            final List<Article> articles = response.body()
+                                    .getArticles();
+                            final Map<String, Article> articleMap = new HashMap<>();
+                            for(Article article : articles) {
+                                articleMap.put(
+                                        article.getObjectID(), article
+                                );
+                            }
+                            for(DeletedArticle deleted : getDeletedArticles()) {
+                                articleMap.remove(deleted.getObjectID());
+                            }
+                            getArticleDao().deleteAll();
+                            getArticleDao().insertOrReplaceInTx(articleMap.values());
+                            adapter.setArticles(
+                                    loadArticlesInOrder()
+                            );
                         }
                     }
 
@@ -77,6 +135,9 @@ public class MainActivityFragment extends Fragment {
                     public void onFailure(@NonNull Call<ArticleResponse> call,
                                           @NonNull Throwable t) {
                         stopRefreshing();
+                        List<Article> articles =
+                                loadArticlesInOrder();
+                        adapter.setArticles(articles);
                     }
                 });
     }
@@ -89,6 +150,15 @@ public class MainActivityFragment extends Fragment {
         articleRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         articleRecycler.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
             .build());
+        onTouchListener = new RecyclerTouchListener(getActivity(),
+                articleRecycler)
+                .setSwipeOptionViews(R.id.rl_match_trash)
+                .setSwipeable(R.id.row_fg, R.id.row_bg, new RecyclerTouchListener.OnSwipeOptionsClickListener() {
+                    @Override
+                    public void onSwipeOptionClicked(int viewID, int position) {
+
+                    }
+                });
         loadArticles();
     }
 }
